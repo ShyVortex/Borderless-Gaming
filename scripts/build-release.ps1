@@ -6,6 +6,11 @@ $csproj = "$root\BorderlessGaming\BorderlessGaming.csproj"
 $steamLibs = "$root\SteamLibs"
 $outDir = "$root\BorderlessGaming\bin\Release"
 
+# Make sure the output folder exists
+if (-not (Test-Path $outDir)) {
+    New-Item -ItemType Directory -Path $outDir | Out-Null
+}
+
 # --- Copy SteamLibs to output ---
 if (Test-Path $steamLibs) {
     Write-Host "Copying SteamLibs to output..."
