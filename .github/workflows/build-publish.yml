@@ -7,10 +7,11 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout code (with submodules)
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          submodules: true
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
@@ -25,6 +26,7 @@ jobs:
           $script = irm "https://bebop.sh"
           & ([scriptblock]::Create($script)) -bebopcVersion $version
           echo "PATH=$env:USERPROFILE\.bebop;$env:PATH" >> $env:GITHUB_ENV
+
       - name: Install Inno Setup
         shell: pwsh
         run: |
@@ -33,9 +35,21 @@ jobs:
           Invoke-WebRequest $url -OutFile $output
           Start-Process -FilePath $output -ArgumentList "/VERYSILENT /DIR=C:\InnoSetup" -Wait
           echo "PATH=C:\InnoSetup;$env:PATH" >> $env:GITHUB_ENV
+
       - name: Build release
         shell: pwsh
-        run: ./scripts/build-release.ps1
+        run: |
+          $scriptPath = Join-Path "${{ github.workspace }}" "scripts/build-release.ps1"
+          
+          if (-not (Test-Path $scriptPath)) {
+            Write-Error "Script not found at $scriptPath"
+            Write-Host "Listing contents of scripts/ directory:"
+            Get-ChildItem -Path (Join-Path "${{ github.workspace }}" "scripts") -Force -ErrorAction SilentlyContinue
+            exit 1
+          }
+
+          Write-Host "Found script at $scriptPath"
+          pwsh -ExecutionPolicy Bypass -File $scriptPath
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
