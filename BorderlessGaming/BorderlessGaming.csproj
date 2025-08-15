@@ -10,6 +10,9 @@
     <AssemblyName>BorderlessGaming</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AssemblyVersion>10.1.0</AssemblyVersion>
+    <FileVersion>10.1.0</FileVersion>
+    <Version>10.1.0</Version>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
