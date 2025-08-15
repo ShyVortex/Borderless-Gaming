@@ -10,9 +10,9 @@
     <PublishSingleFile>true</PublishSingleFile>
     <PublishReadyToRun>true</PublishReadyToRun>
     <SelfContained>true</SelfContained>
-    <AssemblyVersion>10.0.0</AssemblyVersion>
-    <FileVersion>10.0.0</FileVersion>
-    <Version>10.0.0</Version>
+    <AssemblyVersion>10.1.0</AssemblyVersion>
+    <FileVersion>10.1.0</FileVersion>
+    <Version>10.1.0</Version>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
   <PropertyGroup>

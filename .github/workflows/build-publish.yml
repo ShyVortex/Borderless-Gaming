@@ -1,0 +1,65 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Publish Release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+          include-prerelease: true
+
+      - name: Install bebopc
+        shell: pwsh
+        run: |
+          $version = '2.7.4'
+          $script = irm "https://bebop.sh"
+          & ([scriptblock]::Create($script)) -bebopcVersion $version
+          echo "PATH=$env:USERPROFILE\.bebop;$env:PATH" >> $env:GITHUB_ENV
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          $url = "https://jrsoftware.org/download.php/is.exe"
+          $output = "$env:TEMP\is.exe"
+          Invoke-WebRequest $url -OutFile $output
+          Start-Process -FilePath $output -ArgumentList "/VERYSILENT /DIR=C:\InnoSetup" -Wait
+          echo "PATH=C:\InnoSetup;$env:PATH" >> $env:GITHUB_ENV
+      - name: Build release
+        shell: pwsh
+        run: ./scripts/build-release.ps1
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer
+          path: ./Installers/BorderlessGaming*_admin_setup.exe
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Borderless Gaming ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload installer to GitHub Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Installers/BorderlessGaming*_admin_setup.exe
+          asset_name: installer-win64.exe
+          asset_content_type: application/octet-stream
