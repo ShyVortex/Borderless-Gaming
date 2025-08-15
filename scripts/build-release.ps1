@@ -4,7 +4,7 @@ $ErrorActionPreference = "Stop"
 $root = (Get-Item $PSScriptRoot).Parent.FullName
 $csproj = "$root\BorderlessGaming\BorderlessGaming.csproj"
 $steamLibs = "$root\SteamLibs"
-$outDir = "$root\BorderlessGaming\bin\Release"
+$outDir = "$root\BorderlessGaming\bin\Release\net8.0-windows\win-x64\publish"
 
 # Make sure the output folder exists
 if (-not (Test-Path $outDir)) {
