@@ -1,15 +1,30 @@
 $ErrorActionPreference = "Stop"
-$root = (get-item $PSScriptRoot ).parent.FullName
+
+# Root of the repo
+$root = (Get-Item $PSScriptRoot).Parent.FullName
 $csproj = "$root\BorderlessGaming\BorderlessGaming.csproj"
+$steamLibs = "$root\SteamLibs"
+$outDir = "$root\BorderlessGaming\bin\Release"
 
-$projectXml = [xml](Get-Content $csproj)
-$versionXml = [xml](Get-Content "$root\version.xml")
-$projectXml.Project.PropertyGroup[0].AssemblyVersion = "$($versionXml.borderlessgaming.version)"
-$projectXml.Project.PropertyGroup[0].FileVersion = "$($versionXml.borderlessgaming.version)"
-$projectXml.Project.PropertyGroup[0].Version = "$($versionXml.borderlessgaming.version)"
-$projectXml.Save($csproj)
+# --- Copy SteamLibs to output ---
+if (Test-Path $steamLibs) {
+    Write-Host "Copying SteamLibs to output..."
+    Copy-Item "$steamLibs\*" $outDir -Recurse -Force
+} else {
+    Write-Warning "SteamLibs folder not found at $steamLibs"
+}
 
+# --- Run Bebop compiler ---
 & bebopc
-& dotnet restore "$cjproj"
-& dotnet publish "$csproj" -c Release -r win-x64
-& iscc "$root\Installers\BorderlessGaming_Standalone_Admin.iss"
+
+# --- Restore and publish ---
+& dotnet restore "$csproj"
+& dotnet publish "$csproj" -c Release -r win-x64 -o "$outDir"
+
+# --- Build installer with Inno Setup ---
+$issFile = "$root\Installers\BorderlessGaming_Standalone_Admin.iss"
+if (Test-Path $issFile) {
+    & iscc $issFile
+} else {
+    Write-Warning "Inno Setup script not found: $issFile"
+}
